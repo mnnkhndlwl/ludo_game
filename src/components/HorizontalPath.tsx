@@ -2,11 +2,11 @@ import {View, Text} from 'react-native';
 import React, {useMemo} from 'react';
 import Cell from './Cell';
 
-const VerticalPath = ({cells, color}) => {
+const HorizontalPath = ({cells, color}) => {
   const groupedCells = useMemo(() => {
     const groups = [];
-    for (let i = 0; i < cells?.length; i += 3) {
-      groups.push(cells.slice(i, i + 3));
+    for (let i = 0; i < cells?.length; i += 6) {
+      groups.push(cells.slice(i, i + 6));
     }
     return groups;
   }, [cells]);
@@ -16,7 +16,7 @@ const VerticalPath = ({cells, color}) => {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        width: '20%',
+        width: '40%',
         height: '100%',
       }}>
       <View
@@ -30,8 +30,8 @@ const VerticalPath = ({cells, color}) => {
             key={`group=${groupIndex}`}
             style={{
               flexDirection: 'row',
-              width: '33.3%',
-              height: '16.7%',
+              width: '16.7%',
+              height: '33.3%',
             }}>
             {group.map(id => {
               return (
@@ -45,4 +45,4 @@ const VerticalPath = ({cells, color}) => {
   );
 };
 
-export default React.memo(VerticalPath);
+export default React.memo(HorizontalPath);

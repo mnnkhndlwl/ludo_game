@@ -7,6 +7,9 @@ import {deviceHeight, deviceWidth} from '../constants/Scaling';
 import Dice from '../components/Dice';
 import Pocket from '../components/Pocket';
 import VerticalPath from '../components/VerticalPath';
+import {plot1Data, plot2Data, plot3Data, plot4Data} from '../helpers/PlotData';
+import HorizontalPath from '../components/HorizontalPath';
+import FourTraingles from '../components/FourTraingles';
 
 const LudoboardScreen = () => {
   return (
@@ -22,13 +25,23 @@ const LudoboardScreen = () => {
         <View style={styles.ludoBoard}>
           <View style={styles.plotContainer}>
             <Pocket color={'green'} player={2} />
-            <VerticalPath color={'yellow'} />
+            <VerticalPath color={'yellow'} cells={plot2Data} />
             <Pocket color={'yellow'} player={3} />
+          </View>
+          <View style={styles.pathContainer}>
+            <HorizontalPath color={'green'} cells={plot1Data} />
+            <FourTraingles />
+            <HorizontalPath color={'blue'} cells={plot3Data} />
+          </View>
+          <View style={styles.plotContainer}>
+            <Pocket color={'red'} player={1} />
+            <VerticalPath color={'red'} cells={plot4Data} />
+            <Pocket color={'blue'} player={4} />
           </View>
         </View>
         <View style={styles.flexRow}>
-          <Dice color={'blue'} />
-          <Dice color={'red'} rotate={true} />
+          <Dice color={'red'} />
+          <Dice color={'blue'} rotate={true} />
         </View>
       </View>
     </Wrapper>
@@ -62,7 +75,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
     padding: fs(10),
-    backgroundColor: 'red',
   },
   plotContainer: {
     width: '100%',
@@ -70,6 +82,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     backgroundColor: '#ccc',
+  },
+  pathContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    height: '20%',
+    justifyContent: 'space-between',
+    backgroundColor: '#1E5162',
   },
 });
 
