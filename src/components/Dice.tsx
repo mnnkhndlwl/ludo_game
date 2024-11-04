@@ -13,9 +13,18 @@ import {BackgroundImage} from '../helpers/GetIcons';
 import LottieView from 'lottie-react-native';
 import DiceRoll from '../assets/animation/diceroll.json';
 import {LinearGradient} from 'react-native-linear-gradient';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  selectCurrentPlayerChance,
+  selectDiceNo,
+  selectDiceRolled,
+} from '../redux/reducers/gameSelectors';
 
 const Dice = ({color, rotate, player, data}) => {
-  const diceNo = 5;
+  const dispatch = useDispatch();
+  const currentPlayerChance = useSelector(selectCurrentPlayerChance);
+  const isDiceRolled = useSelector(selectDiceRolled);
+  const diceNo = useSelector(selectDiceNo);
   const animationRef = useRef(new Animated.Value(0)).current;
   const pileIcon = BackgroundImage.GetImage(color);
   const diceIcon = BackgroundImage.GetImage(diceNo);
