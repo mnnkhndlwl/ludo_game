@@ -19,6 +19,7 @@ import {
   selectDiceNo,
   selectDiceRolled,
 } from '../redux/reducers/gameSelectors';
+import {updateDiceNo} from '../redux/reducers/gameSlice';
 
 const Dice = ({color, rotate, player, data}) => {
   const dispatch = useDispatch();
@@ -29,7 +30,22 @@ const Dice = ({color, rotate, player, data}) => {
   const pileIcon = BackgroundImage.GetImage(color);
   const diceIcon = BackgroundImage.GetImage(diceNo);
 
+  const playerPieces = useSelector(
+    state => state.game[`player${currentPlayerChance}`],
+  );
+
   const [diceRolling, setDiceRolling] = useState<boolean>(false);
+
+  const delay = (ms: number | undefined) =>
+    new Promise(resolve => setTimeout(resolve, ms));
+
+  const handleDicePress = async () => {
+    const newDiceNo = Math.floor(Math.random() * 6) + 1;
+    setDiceRolling(true);
+    await delay(800);
+    dispatch(updateDiceNo({diceNo: newDiceNo}));
+    setDiceRolling(false);
+  };
 
   useEffect(() => {
     const animateArrow = () => {
@@ -76,14 +92,23 @@ const Dice = ({color, rotate, player, data}) => {
             y: 0.5,
           }}>
           <View style={styles.diceContainer}>
-            <TouchableOpacity>
-              <Image source={diceIcon} style={styles.dice} />
-            </TouchableOpacity>
+            {currentPlayerChance === player && (
+              <>
+                {diceRolling ? null : (
+                  <TouchableOpacity
+                    disabled={isDiceRolled}
+                    activeOpacity={0.4}
+                    onPress={handleDicePress}>
+                    <Image source={diceIcon} style={styles.dice} />
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
           </View>
         </LinearGradient>
       </View>
 
-      {diceRolling && (
+      {currentPlayerChance === player && !diceRolling && (
         <Animated.View style={{transform: [{translateX: animationRef}]}}>
           <Image
             source={require('../assets/images/arrow.png')}
@@ -95,7 +120,7 @@ const Dice = ({color, rotate, player, data}) => {
         </Animated.View>
       )}
 
-      {diceRolling && (
+      {currentPlayerChance === player && diceRolling && (
         <LottieView
           source={DiceRoll}
           style={styles.rollingDice}
