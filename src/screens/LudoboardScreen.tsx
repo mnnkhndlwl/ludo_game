@@ -82,9 +82,9 @@ const LudoboardScreen = () => {
         </View>
         <View style={styles.ludoBoard}>
           <View style={styles.plotContainer}>
-            <Pocket color={'green'} player={2} />
+            <Pocket color={'green'} player={2} data={player2} />
             <VerticalPath color={'yellow'} cells={plot2Data} />
-            <Pocket color={'yellow'} player={3} />
+            <Pocket color={'yellow'} player={3} data={player3} />
           </View>
           <View style={styles.pathContainer}>
             <HorizontalPath color={'green'} cells={plot1Data} />
@@ -92,9 +92,9 @@ const LudoboardScreen = () => {
             <HorizontalPath color={'blue'} cells={plot3Data} />
           </View>
           <View style={styles.plotContainer}>
-            <Pocket color={'red'} player={1} />
+            <Pocket color={'red'} player={1} data={player1} />
             <VerticalPath color={'red'} cells={plot4Data} />
-            <Pocket color={'blue'} player={4} />
+            <Pocket color={'blue'} player={4} data={player4} />
           </View>
         </View>
         <View style={styles.flexRow}>

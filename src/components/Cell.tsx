@@ -4,11 +4,19 @@ import {fs} from '../utils/util.style';
 import Pile from './Pile';
 import {ArrowSpots, SafeSpots, StarSpots} from '../helpers/PlotData';
 import {ArrowRightIcon, StarIcon} from 'react-native-heroicons/outline';
+import {useSelector} from 'react-redux';
+import {selectCurrentPositions} from '../redux/reducers/gameSelectors';
 
 const Cell = ({cell, color, id}) => {
+  const plottedPieces = useSelector(selectCurrentPositions);
+
   const isSafeSpot = useMemo(() => SafeSpots.includes(id), [id]);
   const isStarSpot = useMemo(() => StarSpots.includes(id), [id]);
   const isArrowSpot = useMemo(() => ArrowSpots.includes(id), [id]);
+
+  const piecesAtPosition = useMemo(() => {
+    plottedPieces.filter;
+  }, [plottedPieces, id]);
 
   return (
     <View

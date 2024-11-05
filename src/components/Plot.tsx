@@ -3,10 +3,16 @@ import React from 'react';
 import Pile from './Pile';
 import {fs} from '../utils/util.style';
 
-const Plot = ({pieceNo, player, color}) => {
+const Plot = ({pieceNo, player, color, data, onPress}) => {
   return (
     <View style={[styles.plot, {backgroundColor: color}]}>
-      <Pile color={color} player={player} />
+      {data && data[pieceNo]?.pos === 0 && (
+        <Pile
+          color={color}
+          player={player}
+          onPress={() => onPress(data[pieceNo])}
+        />
+      )}
     </View>
   );
 };

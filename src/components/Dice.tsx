@@ -19,7 +19,13 @@ import {
   selectDiceNo,
   selectDiceRolled,
 } from '../redux/reducers/gameSelectors';
-import {updateDiceNo} from '../redux/reducers/gameSlice';
+import {
+  enableCellSelection,
+  enablePileSelection,
+  updateDiceNo,
+  updatePlayerChance,
+} from '../redux/reducers/gameSlice';
+import {playSound} from '../utils/SoundUtils';
 
 const Dice = ({color, rotate, player, data}) => {
   const dispatch = useDispatch();
@@ -41,10 +47,61 @@ const Dice = ({color, rotate, player, data}) => {
 
   const handleDicePress = async () => {
     const newDiceNo = Math.floor(Math.random() * 6) + 1;
+    playSound('dice_roll');
     setDiceRolling(true);
     await delay(800);
     dispatch(updateDiceNo({diceNo: newDiceNo}));
     setDiceRolling(false);
+
+    const isAnyPieceAlive = data?.findIndex(i => i.pos != 0 && i.pos != 57); // the piece is not alive it been into the triangle and in sqaure
+    const isAnyPieceLocked = data?.findIndex(i => i.pos == 0); //  the piece which is present in the square
+
+    if (isAnyPieceAlive === -1) {
+      if (newDiceNo === 6) {
+        dispatch(enablePileSelection({playerNo: player}));
+      } else {
+        let chancePlayer = player + 1;
+        if (chancePlayer > 4) {
+          chancePlayer = 1;
+        }
+        await delay(600);
+        dispatch(
+          updatePlayerChance({
+            chancePlayer: chancePlayer,
+          }),
+        );
+      }
+    } else {
+      const canMove = playerPieces.some(
+        pile => pile.travelCount + newDiceNo <= 57 && pile.pos != 0,
+      );
+      if (
+        (!canMove && newDiceNo == 6 && isAnyPieceLocked == -1) ||
+        (!canMove && newDiceNo != 6 && isAnyPieceLocked != -1) ||
+        (!canMove && newDiceNo != 6 && isAnyPieceLocked == -1)
+      ) {
+        let chancePlayer = player + 1;
+        if (chancePlayer > 4) {
+          chancePlayer = 1;
+        }
+        await delay(600);
+        dispatch(
+          updatePlayerChance({
+            chancePlayer: chancePlayer,
+          }),
+        );
+      }
+
+      if (newDiceNo == 6) {
+        enablePileSelection({playerNo: player});
+      }
+
+      dispatch(
+        enableCellSelection({
+          playerNo: player,
+        }),
+      );
+    }
   };
 
   useEffect(() => {
@@ -108,7 +165,7 @@ const Dice = ({color, rotate, player, data}) => {
         </LinearGradient>
       </View>
 
-      {currentPlayerChance === player && !diceRolling && (
+      {currentPlayerChance === player && !isDiceRolled && (
         <Animated.View style={{transform: [{translateX: animationRef}]}}>
           <Image
             source={require('../assets/images/arrow.png')}

@@ -2,8 +2,42 @@ import {View, Text, StyleSheet} from 'react-native';
 import React from 'react';
 import {fs} from '../utils/util.style';
 import Plot from './Plot';
+import {useDispatch} from 'react-redux';
+import {
+  unfreezeDice,
+  updatePlayerPieceValue,
+} from '../redux/reducers/gameSlice';
+import {startingPoints} from '../helpers/PlotData';
 
-const Pocket = ({color, player}) => {
+const Pocket = ({color, player, data}) => {
+  const dispatch = useDispatch();
+  const handlePress = async value => {
+    let playerNo = value?.id[0];
+    switch (playerNo) {
+      case 'A':
+        playerNo = 'player1';
+        break;
+      case 'B':
+        playerNo = 'player2';
+        break;
+      case 'C':
+        playerNo = 'player3';
+        break;
+      case 'D':
+        playerNo = 'player4';
+        break;
+    }
+    dispatch(
+      updatePlayerPieceValue({
+        playerNo: playerNo,
+        pieceId: value?.id,
+        pos: startingPoints[parseInt(playerNo.match(/\d+/)[0], 10) - 1],
+        travelCount: 1,
+      }),
+    );
+    dispatch(unfreezeDice());
+  };
+
   return (
     <View
       style={[
@@ -14,12 +48,36 @@ const Pocket = ({color, player}) => {
       ]}>
       <View style={styles.childFrame}>
         <View style={styles.flexRow}>
-          <Plot pieceNo={0} player={player} color={color} />
-          <Plot pieceNo={1} player={player} color={color} />
+          <Plot
+            pieceNo={0}
+            data={data}
+            onPress={handlePress}
+            player={player}
+            color={color}
+          />
+          <Plot
+            pieceNo={1}
+            data={data}
+            onPress={handlePress}
+            player={player}
+            color={color}
+          />
         </View>
         <View style={styles.flexRow}>
-          <Plot pieceNo={2} player={player} color={color} />
-          <Plot pieceNo={3} player={player} color={color} />
+          <Plot
+            pieceNo={2}
+            data={data}
+            onPress={handlePress}
+            player={player}
+            color={color}
+          />
+          <Plot
+            pieceNo={3}
+            data={data}
+            onPress={handlePress}
+            player={player}
+            color={color}
+          />
         </View>
       </View>
     </View>
