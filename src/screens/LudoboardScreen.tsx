@@ -76,7 +76,9 @@ const LudoboardScreen = () => {
         <Image source={MenuIcon} style={styles.menuIcon} />
       </TouchableOpacity>
       <View style={styles.container}>
-        <View style={styles.flexRow}>
+        <View
+          style={styles.flexRow}
+          pointerEvents={isDiceTouch ? 'none' : 'auto'}>
           <Dice color={'green'} player={2} data={player2} />
           <Dice color={'yellow'} rotate={true} data={player3} player={3} />
         </View>
@@ -97,7 +99,9 @@ const LudoboardScreen = () => {
             <Pocket color={'blue'} player={4} data={player4} />
           </View>
         </View>
-        <View style={styles.flexRow}>
+        <View
+          style={styles.flexRow}
+          pointerEvents={isDiceTouch ? 'none' : 'auto'}>
           <Dice color={'red'} player={1} data={player1} />
           <Dice color={'blue'} rotate={true} player={4} data={player4} />
         </View>

@@ -93,7 +93,7 @@ const Dice = ({color, rotate, player, data}) => {
       }
 
       if (newDiceNo == 6) {
-        enablePileSelection({playerNo: player});
+        dispatch(enablePileSelection({playerNo: player}));
       }
 
       dispatch(

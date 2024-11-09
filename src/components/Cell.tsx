@@ -1,11 +1,12 @@
 import {View, Text, StyleSheet} from 'react-native';
-import React, {useMemo} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {fs} from '../utils/util.style';
 import Pile from './Pile';
 import {ArrowSpots, SafeSpots, StarSpots} from '../helpers/PlotData';
 import {ArrowRightIcon, StarIcon} from 'react-native-heroicons/outline';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {selectCurrentPositions} from '../redux/reducers/gameSelectors';
+import {handleForwardThunk} from '../redux/reducers/gameAction';
 
 const Cell = ({cell, color, id}) => {
   const plottedPieces = useSelector(selectCurrentPositions);
@@ -14,9 +15,19 @@ const Cell = ({cell, color, id}) => {
   const isStarSpot = useMemo(() => StarSpots.includes(id), [id]);
   const isArrowSpot = useMemo(() => ArrowSpots.includes(id), [id]);
 
-  const piecesAtPosition = useMemo(() => {
-    plottedPieces.filter;
-  }, [plottedPieces, id]);
+  const dispatch = useDispatch();
+
+  const piecesAtPosition = useMemo(
+    () => plottedPieces.filter(item => item?.pos === id),
+    [plottedPieces, id],
+  );
+
+  const handlePress = useCallback(
+    (playerNo, pieceId) => {
+      dispatch(handleForwardThunk(playerNo, pieceId, id));
+    },
+    [dispatch, id],
+  );
 
   return (
     <View
@@ -47,13 +58,61 @@ const Cell = ({cell, color, id}) => {
           color={'black'}
         />
       )}
-      {/* <Pile
-        cell={true}
-        player={2}
-        pieceId={2}
-        onPress={() => {}}
-        color={color}
-      /> */}
+      {piecesAtPosition?.map((piece, index) => {
+        const playerNo =
+          piece?.id[0] === 'A'
+            ? 1
+            : piece?.id[0] === 'B'
+            ? 2
+            : piece?.id[0] === 'C'
+            ? 3
+            : 4;
+
+        const pieceColor =
+          piece?.id[0] === 'A'
+            ? 'red'
+            : piece?.id[0] === 'B'
+            ? 'green'
+            : piece?.id[0] !== 'C'
+            ? 'blue'
+            : 'yellow';
+
+        return (
+          <View
+            key={piece?.id}
+            style={[
+              styles?.pieceContainer,
+              {
+                transform: [
+                  {
+                    scale: piecesAtPosition?.length === 1 ? 1 : 0.7,
+                  },
+                  {
+                    translateX:
+                      piecesAtPosition?.length === 1
+                        ? 0
+                        : index % 2 === 0
+                        ? -6
+                        : 6,
+                  },
+                  {
+                    translateY:
+                      piecesAtPosition?.length === 1 ? 0 : index < 2 ? -6 : 6,
+                  },
+                ],
+              },
+            ]}>
+            <Pile
+              cell={true}
+              player={playerNo}
+              pieceId={piece?.id}
+              onPress={() => handlePress(playerNo, piece?.id)}
+              color={pieceColor}
+            />
+          </View>
+        );
+      })}
+
       {/* <Text>{id}</Text> */}
     </View>
   );
