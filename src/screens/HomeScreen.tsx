@@ -6,6 +6,7 @@ import {
   Alert,
   Pressable,
   Animated,
+  Linking,
 } from 'react-native';
 import React, {useCallback, useEffect, useRef} from 'react';
 import Wrapper from '../components/Wrapper';
@@ -181,24 +182,18 @@ const HomeScreen = () => {
         </Pressable>
       </Animated.View>
 
-      <Text
-        style={StyleSheet.compose(
-          {
-            bottom: fs(60),
-          },
-          styles.madeBy,
-        )}>
-        Made by Manan Khandelwal
-      </Text>
-      <Text
-        style={StyleSheet.compose(
-          {
-            bottom: fs(40),
-          },
-          styles.madeBy,
-        )}>
-        www.github.com/mnnkhndlwl
-      </Text>
+      <Pressable
+        onPress={() => Linking.openURL('https://github.com/mnnkhndlwl')}>
+        <Text style={StyleSheet.compose({bottom: fs(60)}, styles.madeBy)}>
+          Made by Manan Khandelwal
+        </Text>
+      </Pressable>
+      <Pressable
+        onPress={() => Linking.openURL('https://github.com/mnnkhndlwl')}>
+        <Text style={StyleSheet.compose({bottom: fs(40)}, styles.madeBy)}>
+          www.github.com/mnnkhndlwl
+        </Text>
+      </Pressable>
     </Wrapper>
   );
 };
