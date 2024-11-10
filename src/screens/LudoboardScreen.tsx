@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Image,
@@ -25,6 +25,9 @@ import {
   selectDiceTouch,
 } from '../redux/reducers/gameSelectors';
 import {useIsFocused} from '@react-navigation/native';
+import MenuModal from '../components/MenuModal';
+import {playSound} from '../utils/SoundUtils';
+import WinModal from '../components/WinModal';
 
 const LudoboardScreen = () => {
   const player1 = useSelector(selectPlayer1);
@@ -70,9 +73,14 @@ const LudoboardScreen = () => {
   //   }
   // }, [isFocused]);
 
+  const handleMenuPress = useCallback(() => {
+    playSound('ui');
+    setMenuVisible(true);
+  }, []);
+
   return (
     <Wrapper>
-      <TouchableOpacity style={styles.menuIconButton}>
+      <TouchableOpacity onPress={handleMenuPress} style={styles.menuIconButton}>
         <Image source={MenuIcon} style={styles.menuIcon} />
       </TouchableOpacity>
       <View style={styles.container}>
@@ -90,7 +98,12 @@ const LudoboardScreen = () => {
           </View>
           <View style={styles.pathContainer}>
             <HorizontalPath color={'green'} cells={plot1Data} />
-            <FourTraingles />
+            <FourTraingles
+              player1={player1}
+              player2={player2}
+              player3={player3}
+              player4={player4}
+            />
             <HorizontalPath color={'blue'} cells={plot3Data} />
           </View>
           <View style={styles.plotContainer}>
@@ -118,6 +131,14 @@ const LudoboardScreen = () => {
           }}
         />
       )}
+
+      {menuVisible && (
+        <MenuModal
+          onPressHide={() => setMenuVisible(false)}
+          visible={menuVisible}
+        />
+      )}
+      {winner !== null && <WinModal winner={winner} />}
     </Wrapper>
   );
 };

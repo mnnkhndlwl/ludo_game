@@ -10,7 +10,7 @@ const Stack = createNativeStackNavigator();
 function Navigation() {
   return (
     <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator initialRouteName="LudoBoardScreen">
+      <Stack.Navigator initialRouteName="SplashScreen">
         <Stack.Screen
           name="LudoBoardScreen"
           options={{
