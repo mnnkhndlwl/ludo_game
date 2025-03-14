@@ -183,16 +183,20 @@ const HomeScreen = () => {
       </Animated.View>
 
       <Pressable
+        style={{
+          position: 'absolute',
+          bottom: fs(60),
+        }}
         onPress={() => Linking.openURL('https://github.com/mnnkhndlwl')}>
-        <Text style={StyleSheet.compose({bottom: fs(60)}, styles.madeBy)}>
-          Made by Manan Khandelwal
-        </Text>
+        <Text style={styles.madeBy}>Made by Manan Khandelwal</Text>
       </Pressable>
       <Pressable
+        style={{
+          position: 'absolute',
+          bottom: fs(40),
+        }}
         onPress={() => Linking.openURL('https://github.com/mnnkhndlwl')}>
-        <Text style={StyleSheet.compose({bottom: fs(40)}, styles.madeBy)}>
-          www.github.com/mnnkhndlwl
-        </Text>
+        <Text style={styles.madeBy}>www.github.com/mnnkhndlwl</Text>
       </Pressable>
     </Wrapper>
   );
@@ -205,7 +209,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   madeBy: {
-    position: 'absolute',
+    //  position: 'absolute',
 
     fontWeight: 800,
     fontStyle: 'italic',

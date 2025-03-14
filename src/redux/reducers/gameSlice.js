@@ -55,7 +55,7 @@ export const gameSlice = createSlice({
           // if someone strikes your piece then we reset its position to 0
           if (currentPositionIndex !== -1) {
             // remove all it's current postions and push -1
-            state?.currentPositions.splice(currentPositionIndex, -1);
+            state?.currentPositions.splice(currentPositionIndex, 1);
           }
         } else {
           if (currentPositionIndex !== -1) {
