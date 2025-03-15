@@ -5,6 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Text,
+  Alert,
 } from 'react-native';
 import Wrapper from '../components/Wrapper';
 import MenuIcon from '../assets/images/menu.png';
@@ -23,11 +25,13 @@ import {
   selectPlayer4,
   selectPlayer3,
   selectDiceTouch,
+  selectCurrentPlayerChance,
 } from '../redux/reducers/gameSelectors';
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import MenuModal from '../components/MenuModal';
 import {playSound} from '../utils/SoundUtils';
 import WinModal from '../components/WinModal';
+import {isConnected, getRoomId} from '../utils/WebSocketUtil';
 
 const LudoboardScreen = () => {
   const player1 = useSelector(selectPlayer1);
@@ -36,53 +40,78 @@ const LudoboardScreen = () => {
   const player4 = useSelector(selectPlayer4);
   const isDiceTouch = useSelector(selectDiceTouch);
   const winner = useSelector(state => state.game.winner);
+  const currentPlayerChance = useSelector(selectCurrentPlayerChance);
 
   const isFocused = useIsFocused();
+  const navigation = useNavigation();
 
   const [showStartImage, setShowStartImage] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [isMultiplayer, setIsMultiplayer] = useState(false);
+  const [roomIdDisplay, setRoomIdDisplay] = useState('');
 
   const opacity = useRef(new Animated.Value(1)).current;
 
-  // useEffect(() => {
-  //   if (isFocused) {
-  //     setShowStartImage(true);
-  //     const blinkAnimation = Animated.loop(
-  //       Animated.sequence([
-  //         Animated.timing(opacity, {
-  //           toValue: 0,
-  //           duration: 500,
-  //           useNativeDriver: true,
-  //         }),
-  //         Animated.timing(opacity, {
-  //           toValue: 1,
-  //           duration: 500,
-  //           useNativeDriver: true,
-  //         }),
-  //       ]),
-  //     );
-  //     blinkAnimation.start();
-  //     const timeout = setTimeout(() => {
-  //       blinkAnimation.stop();
-  //       setShowStartImage(false);
-  //     }, 2500);
-  //     return () => {
-  //       blinkAnimation.stop();
-  //       clearTimeout(timeout);
-  //     };
-  //   }
-  // }, [isFocused]);
+  useEffect(() => {
+    // Check if we're in a multiplayer game
+    if (isFocused) {
+      const connected = isConnected();
+      setIsMultiplayer(connected);
+
+      if (connected) {
+        const roomId = getRoomId();
+        if (roomId) {
+          setRoomIdDisplay(roomId);
+        }
+      }
+    }
+  }, [isFocused]);
 
   const handleMenuPress = useCallback(() => {
     playSound('ui');
     setMenuVisible(true);
   }, []);
 
+  const handleCopyRoomId = useCallback(() => {
+    if (roomIdDisplay) {
+      // Copy room ID to clipboard
+      Alert.alert(
+        'Room ID',
+        `Share this room ID with your friends: ${roomIdDisplay}`,
+      );
+    }
+  }, [roomIdDisplay]);
+
   return (
     <Wrapper>
       <TouchableOpacity onPress={handleMenuPress} style={styles.menuIconButton}>
         <Image source={MenuIcon} style={styles.menuIcon} />
       </TouchableOpacity>
+
+      {isMultiplayer && roomIdDisplay && (
+        <TouchableOpacity
+          onPress={handleCopyRoomId}
+          style={styles.roomIdContainer}>
+          <Text style={styles.roomIdText}>Room: {roomIdDisplay}</Text>
+          <Text style={styles.roomIdSubtext}>Tap to share</Text>
+        </TouchableOpacity>
+      )}
+
+      {isMultiplayer && (
+        <View style={styles.playerTurnContainer}>
+          <Text style={styles.playerTurnText}>
+            {currentPlayerChance === 1
+              ? 'Red'
+              : currentPlayerChance === 2
+              ? 'Green'
+              : currentPlayerChance === 3
+              ? 'Yellow'
+              : 'Blue'}
+            's Turn
+          </Text>
+        </View>
+      )}
+
       <View style={styles.container}>
         <View
           style={styles.flexRow}
@@ -184,6 +213,37 @@ const styles = StyleSheet.create({
     height: '20%',
     justifyContent: 'space-between',
     backgroundColor: '#1E5162',
+  },
+  roomIdContainer: {
+    position: 'absolute',
+    top: fs(60),
+    right: fs(20),
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: fs(10),
+    borderRadius: fs(5),
+    alignItems: 'center',
+  },
+  roomIdText: {
+    color: '#fff',
+    fontSize: fs(14),
+    fontWeight: 'bold',
+  },
+  roomIdSubtext: {
+    color: '#ddd',
+    fontSize: fs(10),
+  },
+  playerTurnContainer: {
+    position: 'absolute',
+    top: fs(120),
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: fs(10),
+    borderRadius: fs(5),
+  },
+  playerTurnText: {
+    color: '#fff',
+    fontSize: fs(16),
+    fontWeight: 'bold',
   },
 });
 

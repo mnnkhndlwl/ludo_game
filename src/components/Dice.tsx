@@ -26,8 +26,8 @@ import {
   updatePlayerChance,
 } from '../redux/reducers/gameSlice';
 import {playSound} from '../utils/SoundUtils';
-
-const socket = new WebSocket('ws://192.168.1.4:8080/ws?room_id=room1');
+import {sendMessage, isConnected} from '../utils/WebSocketUtil';
+import {rollDiceThunk} from '../redux/reducers/gameAction';
 
 const Dice = ({color, rotate, player, data}) => {
   const dispatch = useDispatch();
@@ -37,22 +37,6 @@ const Dice = ({color, rotate, player, data}) => {
   const animationRef = useRef(new Animated.Value(0)).current;
   const pileIcon = BackgroundImage.GetImage(color);
   const diceIcon = BackgroundImage.GetImage(diceNo);
-
-  useEffect(() => {
-    socket.onmessage = msg => {
-      const data = JSON.parse(msg.data);
-      console.log('data', JSON.stringify(data, null, 2));
-      if (data.event === 'diceRoll') {
-        console.log('data', data);
-        const content = JSON.parse(data.content);
-        console.log('content', content);
-        dispatch(updateDiceNo({diceNo: content.diceNo}));
-        dispatch(updatePlayerChance({chancePlayer: content.playerId}));
-      }
-    };
-
-    return () => socket.close();
-  }, []);
 
   const playerPieces = useSelector(
     state => state.game[`player${currentPlayerChance}`],
@@ -68,17 +52,11 @@ const Dice = ({color, rotate, player, data}) => {
     playSound('dice_roll');
     setDiceRolling(true);
     await delay(800);
-    dispatch(updateDiceNo({diceNo: newDiceNo}));
-    setDiceRolling(false);
 
-    // Emit dice roll event
-    socket.send(
-      JSON.stringify({
-        RoomID: 'room1',
-        Content: JSON.stringify({playerId: player, diceNo: newDiceNo}),
-        Event: 'diceRoll',
-      }),
-    );
+    // Use the rollDiceThunk action which handles WebSocket communication
+    dispatch(rollDiceThunk(newDiceNo));
+
+    setDiceRolling(false);
 
     const isAnyPieceAlive = data?.findIndex(i => i.pos != 0 && i.pos != 57); // the piece is not alive it been into the triangle and in sqaure
     const isAnyPieceLocked = data?.findIndex(i => i.pos == 0); //  the piece which is present in the square
@@ -97,6 +75,11 @@ const Dice = ({color, rotate, player, data}) => {
             chancePlayer: chancePlayer,
           }),
         );
+
+        // Send player chance update via WebSocket
+        if (isConnected()) {
+          sendMessage('player_chance', {chancePlayer});
+        }
       }
     } else {
       const canMove = playerPieces.some(
@@ -117,6 +100,11 @@ const Dice = ({color, rotate, player, data}) => {
             chancePlayer: chancePlayer,
           }),
         );
+
+        // Send player chance update via WebSocket
+        if (isConnected()) {
+          sendMessage('player_chance', {chancePlayer});
+        }
       }
 
       if (newDiceNo == 6) {

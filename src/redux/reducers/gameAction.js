@@ -17,6 +17,7 @@ import {
 } from './gameSlice';
 import {delay} from '../../utils/delay';
 import {playSound} from '../../utils/SoundUtils';
+import {sendMessage, isConnected} from '../../utils/WebSocketUtil';
 
 export const handleForwardThunk =
   (playerNo, id, pos) => async (dispatch, getState) => {
@@ -65,6 +66,17 @@ export const handleForwardThunk =
           travelCount: travelCount,
         }),
       );
+
+      // Send piece move update via WebSocket
+      if (isConnected()) {
+        sendMessage('piece_move', {
+          playerNo: `player${playerNo}`,
+          pieceId: playerPiece.id,
+          pos: path,
+          travelCount: travelCount,
+        });
+      }
+
       playSound('pile_move');
       await delay(200);
     }
@@ -88,6 +100,11 @@ export const handleForwardThunk =
     if (diceNo === 6 || travelCount === 57) {
       dispatch(updatePlayerChance({chancePlayer: playerNo}));
 
+      // Send player chance update via WebSocket
+      if (isConnected()) {
+        sendMessage('player_chance', {chancePlayer: playerNo});
+      }
+
       if (
         travelCount === 57 &&
         checkWinningCriteria(getState().game[`player${playerNo}`])
@@ -96,12 +113,33 @@ export const handleForwardThunk =
         dispatch(announceWinner(playerNo));
         playSound('cheer');
         dispatch(updateFireworks(true));
+
+        // Send winner update via WebSocket
+        if (isConnected()) {
+          sendMessage('winner', {winner: playerNo});
+        }
       }
       dispatch(unfreezeDice());
     } else {
-      dispatch(updatePlayerChance({chancePlayer: getNextPlayer(playerNo)}));
+      const nextPlayer = getNextPlayer(playerNo);
+      dispatch(updatePlayerChance({chancePlayer: nextPlayer}));
+
+      // Send player chance update via WebSocket
+      if (isConnected()) {
+        sendMessage('player_chance', {chancePlayer: nextPlayer});
+      }
     }
   };
+
+// Roll dice action with WebSocket support
+export const rollDiceThunk = diceNo => async dispatch => {
+  dispatch(updateDiceNo({diceNo}));
+
+  // Send dice roll update via WebSocket
+  if (isConnected()) {
+    sendMessage('dice_roll', {diceNo});
+  }
+};
 
 // Helper Functions
 
@@ -166,6 +204,17 @@ async function moveEnemyPieceToStart(enemyPiece, dispatch) {
         travelCount: 0,
       }),
     );
+
+    // Send piece move update via WebSocket
+    if (isConnected()) {
+      sendMessage('piece_move', {
+        playerNo: `player${no}`,
+        pieceId: enemyPiece.id,
+        pos: i,
+        travelCount: 0,
+      });
+    }
+
     await delay(400);
   }
 
@@ -177,6 +226,16 @@ async function moveEnemyPieceToStart(enemyPiece, dispatch) {
       travelCount: 0,
     }),
   );
+
+  // Send final piece move update via WebSocket
+  if (isConnected()) {
+    sendMessage('piece_move', {
+      playerNo: `player${no}`,
+      pieceId: enemyPiece.id,
+      pos: 0,
+      travelCount: 0,
+    });
+  }
 }
 
 function checkWinningCriteria(pieces) {

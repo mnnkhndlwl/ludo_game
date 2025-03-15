@@ -8,7 +8,7 @@ import {
   Animated,
   Linking,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Wrapper from '../components/Wrapper';
 import {deviceHeight, deviceWidth} from '../constants/Scaling';
 import {fs} from '../utils/util.style';
@@ -20,6 +20,8 @@ import {playSound} from '../utils/SoundUtils';
 import SoundPlayer from 'react-native-sound-player';
 import {resetGame} from '../redux/reducers/gameSlice';
 import LottieView from 'lottie-react-native';
+import MultiplayerModal from '../components/MultiplayerModal';
+import {closeWebSocket} from '../utils/WebSocketUtil';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
@@ -32,10 +34,13 @@ const HomeScreen = () => {
 
   const witchAnim = useRef(new Animated.Value(-deviceWidth)).current;
   const ScaleXAnim = useRef(new Animated.Value(-1)).current;
+  const [multiplayerModalVisible, setMultiplayerModalVisible] = useState(false);
 
   useEffect(() => {
     if (isFocused) {
       playSound('home');
+      // Close any existing WebSocket connection when returning to home screen
+      closeWebSocket();
     }
   }, [isFocused]);
 
@@ -59,6 +64,11 @@ const HomeScreen = () => {
 
   const handleResumePress = async () => {
     startGame();
+  };
+
+  const handleMultiplayerPress = () => {
+    setMultiplayerModalVisible(true);
+    playSound('ui');
   };
 
   const loopAnimation = () => {
@@ -140,6 +150,7 @@ const HomeScreen = () => {
       </Animated.View>
       {currentPostion.length !== 0 && renderButton('RESUME', handleResumePress)}
       {renderButton('NEW GAME', handleNewGamePress)}
+      {renderButton('MULTIPLAYER', handleMultiplayerPress)}
       {renderButton('VS CPU', () =>
         Alert.alert('Bhai ye feature abhi bana rha hu'),
       )}
@@ -198,6 +209,11 @@ const HomeScreen = () => {
         onPress={() => Linking.openURL('https://github.com/mnnkhndlwl')}>
         <Text style={styles.madeBy}>www.github.com/mnnkhndlwl</Text>
       </Pressable>
+
+      <MultiplayerModal
+        visible={multiplayerModalVisible}
+        onPressHide={() => setMultiplayerModalVisible(false)}
+      />
     </Wrapper>
   );
 };
