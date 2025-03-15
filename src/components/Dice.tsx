@@ -27,6 +27,8 @@ import {
 } from '../redux/reducers/gameSlice';
 import {playSound} from '../utils/SoundUtils';
 
+const socket = new WebSocket('ws://192.168.1.4:8080/ws?room_id=room1');
+
 const Dice = ({color, rotate, player, data}) => {
   const dispatch = useDispatch();
   const currentPlayerChance = useSelector(selectCurrentPlayerChance);
@@ -35,6 +37,22 @@ const Dice = ({color, rotate, player, data}) => {
   const animationRef = useRef(new Animated.Value(0)).current;
   const pileIcon = BackgroundImage.GetImage(color);
   const diceIcon = BackgroundImage.GetImage(diceNo);
+
+  useEffect(() => {
+    socket.onmessage = msg => {
+      const data = JSON.parse(msg.data);
+      console.log('data', JSON.stringify(data, null, 2));
+      if (data.event === 'diceRoll') {
+        console.log('data', data);
+        const content = JSON.parse(data.content);
+        console.log('content', content);
+        dispatch(updateDiceNo({diceNo: content.diceNo}));
+        dispatch(updatePlayerChance({chancePlayer: content.playerId}));
+      }
+    };
+
+    return () => socket.close();
+  }, []);
 
   const playerPieces = useSelector(
     state => state.game[`player${currentPlayerChance}`],
@@ -52,6 +70,15 @@ const Dice = ({color, rotate, player, data}) => {
     await delay(800);
     dispatch(updateDiceNo({diceNo: newDiceNo}));
     setDiceRolling(false);
+
+    // Emit dice roll event
+    socket.send(
+      JSON.stringify({
+        RoomID: 'room1',
+        Content: JSON.stringify({playerId: player, diceNo: newDiceNo}),
+        Event: 'diceRoll',
+      }),
+    );
 
     const isAnyPieceAlive = data?.findIndex(i => i.pos != 0 && i.pos != 57); // the piece is not alive it been into the triangle and in sqaure
     const isAnyPieceLocked = data?.findIndex(i => i.pos == 0); //  the piece which is present in the square

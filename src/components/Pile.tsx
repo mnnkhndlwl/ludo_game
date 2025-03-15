@@ -65,6 +65,7 @@ const Pile = ({color, cell, player, onPress, pieceId}) => {
   return (
     <TouchableOpacity
       style={styles.container}
+      hitSlop={isCellEnabled ? {top: 10, bottom: 10, left: 10, right: 10} : {}}
       activeOpacity={0.5}
       disabled={!(cell ? isCellEnabled && isForwadable() : isPileEnabled)}
       onPress={onPress}>
